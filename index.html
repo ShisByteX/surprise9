@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Suchismita — A Virtual Date with Snehashis</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Playfair Display & Great Vibes & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Tone.js for rich client-side romantic chimes and music -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-script {
+            font-family: 'Great Vibes', cursive;
+        }
+        .font-serif-title {
+            font-family: 'Playfair Display', serif;
+        }
+        /* Custom romantic gradients & glassmorphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 215, 225, 0.45);
+        }
+        .glass-card-dark {
+            background: rgba(30, 15, 25, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 182, 193, 0.2);
+        }
+        /* Candle flickering glow */
+        @keyframes flicker {
+            0%, 100% { transform: scale(1) rotate(-1deg); opacity: 0.95; filter: drop-shadow(0 0 14px #ff9e42); }
+            50% { transform: scale(1.12) rotate(1.5deg); opacity: 1; filter: drop-shadow(0 0 22px #ffc107); }
+            75% { transform: scale(0.96) rotate(-0.5deg); opacity: 0.88; filter: drop-shadow(0 0 10px #ff7043); }
+        }
+        .candle-flame {
+            animation: flicker 1.8s infinite ease-in-out;
+            transform-origin: bottom center;
+        }
+        /* Gentle floating animation */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1.5deg); }
+        }
+        .animate-float {
+            animation: floatSlow 4.5s ease-in-out infinite;
+        }
+        /* Pulse for hearts */
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.18); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.22); }
+            70% { transform: scale(1); }
+        }
+        .animate-heartbeat {
+            animation: heartBeat 2s infinite;
+        }
+        /* Ambient room glow transition */
+        .ambient-dim {
+            background: radial-gradient(circle at center, #2e1022 0%, #150611 100%);
+            transition: background 1.5s ease;
+        }
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #ffe4e6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #f43f5e;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-rose-50 via-pink-50 to-amber-50 text-slate-800 min-h-screen relative overflow-x-hidden transition-colors duration-1000" id="mainBody">
+
+    <!-- Floating Petal Canvas (Overlay) -->
+    <canvas id="petalCanvas" class="fixed inset-0 pointer-events-none z-20 w-full h-full"></canvas>
+    <!-- Fireworks & Confetti Canvas -->
+    <canvas id="fxCanvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
+
+    <!-- Sticky Top Navigation Bar -->
+    <header class="sticky top-0 z-40 bg-white/70 backdrop-blur-md border-b border-rose-100 shadow-sm transition-all duration-300">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <span class="text-2xl animate-heartbeat">🌹</span>
+                <span class="font-serif-title font-bold text-rose-600 text-lg md:text-xl tracking-wide">
+                    Suchismita & Snehashis
+                </span>
+            </div>
+
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <!-- Ambient Music Synthesizer Button -->
+                <button id="musicToggleBtn" onclick="toggleRomanticMusic()" class="flex items-center space-x-2 bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium shadow-md shadow-rose-200 transition-transform active:scale-95">
+                    <span id="musicIcon">🎵</span>
+                    <span id="musicLabel">Play "Ishq Mubarak"</span>
+                </button>
+                <!-- Night Mode for Stargazing & Candlelight -->
+                <button onclick="toggleAmbiance()" id="ambianceBtn" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition active:scale-95 flex items-center space-x-1" title="Dim Lights for Candlelight">
+                    <span id="ambianceIcon">🕯️</span>
+                    <span class="hidden sm:inline" id="ambianceLabel">Candlelight Mood</span>
+                </button>
+            </div>
+        </div>
+        <!-- Floating Song & Lyric Status Bar -->
+        <div id="songBanner" class="hidden bg-gradient-to-r from-rose-50 via-pink-100 to-amber-50 border-t border-rose-200/60 py-1.5 px-4 text-center transition-all duration-500">
+            <div class="flex items-center justify-center space-x-2 text-xs text-rose-700">
+                <span class="animate-pulse">🎶</span>
+                <span class="font-semibold">Now Playing: "Ishq Mubarak" for Suchismita</span>
+                <span class="text-rose-400">|</span>
+                <span class="italic text-rose-600 font-serif-title" id="lyricTicker">"Teri baarishein bhigaaye mujhe... Teri hawaaein bahaaye mujhe"</span>
+                <span class="text-xs">❤️</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Welcome Modal / Envelope Reveal -->
+    <div id="welcomeOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-rose-950/70 backdrop-blur-md p-4 transition-opacity duration-700">
+        <div class="glass-card max-w-md w-full rounded-3xl p-6 md:p-8 text-center shadow-2xl border border-rose-200 relative overflow-hidden animate-float">
+            <!-- Decorative corner flourishes -->
+            <div class="absolute -top-6 -right-6 w-24 h-24 bg-rose-200/40 rounded-full blur-xl pointer-events-none"></div>
+            <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-pink-300/30 rounded-full blur-xl pointer-events-none"></div>
+
+            <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-tr from-rose-500 to-pink-400 rounded-full flex items-center justify-center text-3xl shadow-lg shadow-rose-300 text-white animate-heartbeat">
+                💌
+            </div>
+
+            <p class="text-rose-500 text-xs font-semibold tracking-widest uppercase mb-1">A Special Delivery</p>
+            <h1 class="font-serif-title text-2xl md:text-3xl font-bold text-slate-800 mb-2">
+                For Dearest Suchismita
+            </h1>
+            <p class="text-slate-600 text-sm leading-relaxed mb-6 font-light">
+                Snehashis planned an intimate, sweet virtual date just for you — filled with handpicked roses, an authentic Indian candlelight dinner, and the melody of <em>Ishq Mubarak</em>.
+            </p>
+
+            <button onclick="openEnvelope()" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white font-semibold text-base shadow-lg shadow-rose-300 hover:shadow-rose-400 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center space-x-2 group">
+                <span>Open Our Date Experience</span>
+                <span class="group-hover:translate-x-1 transition-transform">✨</span>
+            </button>
+            <p class="text-[11px] text-slate-400 mt-3">Clicking will play the acoustic melody of <strong>"Ishq Mubarak"</strong> 🎶</p>
+        </div>
+    </div>
+
+    <main class="max-w-5xl mx-auto px-4 py-8 relative z-10">
+
+        <!-- Romantic Greeting Banner -->
+        <section class="text-center py-6 md:py-10">
+            <span class="inline-block px-4 py-1.5 rounded-full bg-rose-100 text-rose-600 text-xs font-semibold tracking-wider uppercase mb-3 shadow-sm">
+                Virtual Date Night for Two
+            </span>
+            <h2 class="font-serif-title text-3xl md:text-5xl font-bold text-slate-800 mb-3 tracking-tight">
+                To My Favorite Person, <span class="font-script text-rose-500 text-4xl md:text-6xl font-normal block md:inline mt-1 md:mt-0">Suchismita</span>
+            </h2>
+            <p class="text-slate-600 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+                Distance cannot diminish our warmth. Let’s sit together, sip something warm, smell the blooming roses, and share our quiet world tonight.
+            </p>
+
+            <!-- Navigation Tabs -->
+            <div class="flex flex-wrap justify-center gap-2 md:gap-3 mt-8">
+                <button onclick="switchTab('roses')" id="tabBtn-roses" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-semibold transition-all bg-rose-500 text-white shadow-md shadow-rose-200 flex items-center space-x-1.5">
+                    <span>🌹</span><span>Rose Garden</span>
+                </button>
+                <button onclick="switchTab('dinner')" id="tabBtn-dinner" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-semibold transition-all bg-white/80 text-slate-700 hover:bg-rose-50 hover:text-rose-600 flex items-center space-x-1.5">
+                    <span>🕯️</span><span>Candlelit Table</span>
+                </button>
+                <button onclick="switchTab('sky')" id="tabBtn-sky" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-semibold transition-all bg-white/80 text-slate-700 hover:bg-rose-50 hover:text-rose-600 flex items-center space-x-1.5">
+                    <span>✨</span><span>Starlit Sky</span>
+                </button>
+                <button onclick="switchTab('letter')" id="tabBtn-letter" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-semibold transition-all bg-white/80 text-slate-700 hover:bg-rose-50 hover:text-rose-600 flex items-center space-x-1.5">
+                    <span>💌</span><span>Snehashis's Letter</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- TAB 1: ROSE GARDEN -->
+        <div id="tab-roses" class="tab-content transition-opacity duration-500">
+            <div class="glass-card rounded-3xl p-6 md:p-8 shadow-xl border border-rose-200">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 pb-4 border-b border-rose-100">
+                    <div>
+                        <h3 class="font-serif-title text-2xl font-bold text-slate-800 flex items-center gap-2">
+                            <span>The Bouquet of 12 Special Roses</span>
+                            <span class="text-rose-500 text-xl">💐</span>
+                        </h3>
+                        <p class="text-slate-500 text-xs md:text-sm mt-1">
+                            Click every single rose below to pick it. Each rose carries an honest reason why Snehashis cherishes you.
+                        </p>
+                    </div>
+                    <!-- Bouquet Counter Badge -->
+                    <div class="flex items-center gap-3 bg-gradient-to-r from-rose-100 to-pink-100 px-5 py-2.5 rounded-2xl border border-rose-200 text-rose-700">
+                        <span class="text-2xl animate-bounce" id="bouquetBadgeIcon">🥀</span>
+                        <div>
+                            <span class="text-xs uppercase font-bold tracking-wider block text-rose-500">Bouquet Status</span>
+                            <span class="font-serif-title font-bold text-lg" id="roseCounterText">0 / 12 Gathered</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rose Interactive Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4" id="roseGrid">
+                    <!-- Roses dynamically rendered here -->
+                </div>
+
+                <!-- Completed Bouquet Celebration Banner -->
+                <div id="fullBouquetBanner" class="hidden mt-8 p-6 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white text-center shadow-xl animate-fade-in relative overflow-hidden">
+                    <div class="relative z-10">
+                        <p class="font-script text-3xl md:text-4xl mb-1">A Complete Dozen for Suchismita</p>
+                        <p class="text-rose-100 text-sm max-w-lg mx-auto mb-4">
+                            All 12 roses are picked! Your bouquet is vibrant, blossoming, and holds a piece of Snehashis's deepest affection.
+                        </p>
+                        <button onclick="switchTab('dinner')" class="inline-flex items-center space-x-2 bg-white text-rose-600 px-6 py-2.5 rounded-full font-bold shadow-lg hover:bg-rose-50 active:scale-95 transition">
+                            <span>Proceed to our Candlelit Table</span>
+                            <span>🕯️</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: CANDLELIT DINNER -->
+        <div id="tab-dinner" class="tab-content hidden transition-opacity duration-500">
+            <div class="glass-card rounded-3xl p-6 md:p-8 shadow-xl border border-rose-200">
+                <div class="text-center max-w-lg mx-auto mb-8">
+                    <span class="text-xs uppercase tracking-widest text-rose-500 font-bold">A Table Reserved for Two</span>
+                    <h3 class="font-serif-title text-2xl md:text-3xl font-bold text-slate-800 mt-1">Our Candlelit Virtual Dinner</h3>
+                    <p class="text-slate-500 text-xs md:text-sm mt-1">
+                        Tap the candle to light up our romantic table, choose our menu, and click "Cheers" for a virtual toast!
+                    </p>
+                </div>
+
+                <!-- The Virtual Table Layout -->
+                <div class="bg-gradient-to-b from-rose-100/60 to-amber-50/70 p-6 md:p-10 rounded-3xl border border-rose-200/80 shadow-inner relative max-w-2xl mx-auto">
+                    
+                    <!-- Names Across Table -->
+                    <div class="flex justify-between items-center px-4 mb-8">
+                        <!-- Snehashis Side -->
+                        <div class="text-center">
+                            <div class="w-14 h-14 md:w-16 md:h-16 mx-auto rounded-full bg-slate-800 text-rose-100 flex items-center justify-center text-xl md:text-2xl shadow-md border-2 border-rose-300">
+                                🤵
+                            </div>
+                            <span class="font-serif-title font-semibold text-slate-800 text-sm mt-2 block">Snehashis</span>
+                            <span class="text-[11px] text-rose-500 font-medium">Always admiring you</span>
+                        </div>
+
+                        <!-- Centerpiece: Candle & Wine Glasses -->
+                        <div class="flex flex-col items-center cursor-pointer group" onclick="toggleCandle()">
+                            <div class="relative flex flex-col items-center">
+                                <!-- Candle Flame -->
+                                <div id="candleFlame" class="w-5 h-8 bg-gradient-to-t from-orange-400 via-amber-300 to-yellow-100 rounded-full candle-flame transition-opacity duration-700 shadow-[0_0_20px_#ff9800]"></div>
+                                <!-- Candle wick & wax -->
+                                <div class="w-1.5 h-3 bg-neutral-700 rounded-t-sm"></div>
+                                <div class="w-10 h-16 bg-gradient-to-b from-rose-100 to-rose-200 rounded-t-md rounded-b-lg border border-rose-300 shadow-md flex items-center justify-center">
+                                    <span class="text-xs text-rose-400 font-serif-title">❤️</span>
+                                </div>
+                                <div class="w-14 h-3 bg-rose-300/60 rounded-full mt-[-3px] blur-[1px]"></div>
+                            </div>
+                            <span class="text-[11px] font-semibold text-amber-600 mt-2 group-hover:scale-105 transition" id="candleStatusText">
+                                🔥 Candle is Glowing
+                            </span>
+                        </div>
+
+                        <!-- Suchismita Side -->
+                        <div class="text-center">
+                            <div class="w-14 h-14 md:w-16 md:h-16 mx-auto rounded-full bg-gradient-to-tr from-rose-400 to-pink-300 text-white flex items-center justify-center text-xl md:text-2xl shadow-md border-2 border-rose-200">
+                                👸
+                            </div>
+                            <span class="font-serif-title font-semibold text-slate-800 text-sm mt-2 block">Suchismita</span>
+                            <span class="text-[11px] text-rose-500 font-medium">The star of tonight</span>
+                        </div>
+                    </div>
+
+                    <!-- Toast Glasses & Interactive Action -->
+                    <div class="flex flex-col items-center justify-center my-4 py-4 border-t border-b border-rose-200/60">
+                        <div class="flex items-center space-x-6 text-4xl mb-3" id="glassesContainer">
+                            <span id="leftGlass" class="transition-transform duration-300">🥂</span>
+                        </div>
+                        <button onclick="cheersToast()" class="px-5 py-2 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 text-white text-xs md:text-sm font-semibold shadow-md shadow-amber-200 hover:scale-105 active:scale-95 transition flex items-center space-x-2">
+                            <span>Clink Glasses & Say "Cheers!"</span>
+                            <span>✨</span>
+                        </button>
+                        <p id="toastMessage" class="text-xs text-rose-600 font-medium mt-2 h-4 transition-opacity duration-300"></p>
+                    </div>
+
+                    <!-- Menu Selection for the Virtual Date (Indian Cuisine) -->
+                    <div class="mt-6">
+                        <div class="flex items-center justify-center gap-2 mb-3">
+                            <span class="text-rose-500 text-base">✨🍛</span>
+                            <h4 class="text-center font-serif-title font-semibold text-slate-700 text-sm">
+                                Customize Our Desi Date Night Feast:
+                            </h4>
+                            <span class="text-rose-500 text-base">🍛✨</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                            <!-- Course 1: Desi Sips -->
+                            <div class="bg-white/85 p-3 rounded-2xl border border-rose-200 text-center shadow-sm hover:border-rose-300 transition">
+                                <span class="text-2xl block mb-1">☕</span>
+                                <span class="font-bold text-slate-800 block">Sip Together</span>
+                                <select id="beverageChoice" onchange="updateMenuChoice()" class="mt-2 bg-rose-50 text-slate-700 rounded-xl p-1.5 text-[11px] w-full border border-rose-200 outline-none focus:ring-1 focus:ring-rose-400">
+                                    <option>Kulhad Masala Chai & Adrak</option>
+                                    <option>Sweet Alphonso Mango Lassi</option>
+                                    <option>Royal Kesar Badam Doodh</option>
+                                    <option>Shahi Gulab Rooh Afza Sharbat</option>
+                                </select>
+                            </div>
+                            <!-- Course 2: Indian Main Delicacies -->
+                            <div class="bg-white/85 p-3 rounded-2xl border border-rose-200 text-center shadow-sm hover:border-rose-300 transition">
+                                <span class="text-2xl block mb-1">🍲</span>
+                                <span class="font-bold text-slate-800 block">Desi Main Delicacy</span>
+                                <select id="mainChoice" onchange="updateMenuChoice()" class="mt-2 bg-rose-50 text-slate-700 rounded-xl p-1.5 text-[11px] w-full border border-rose-200 outline-none focus:ring-1 focus:ring-rose-400">
+                                    <option>Aromatic Awadhi Dum Biryani & Raita</option>
+                                    <option>Paneer Butter Masala & Garlic Naan</option>
+                                    <option>Rich Dal Makhani with Laccha Paratha</option>
+                                    <option>Kolkata Style Kathi Rolls & Green Chutney</option>
+                                    <option>Bengali Shahi Basanti Pulao with Love</option>
+                                </select>
+                            </div>
+                            <!-- Course 3: Traditional Indian Sweets -->
+                            <div class="bg-white/85 p-3 rounded-2xl border border-rose-200 text-center shadow-sm hover:border-rose-300 transition">
+                                <span class="text-2xl block mb-1">🍮</span>
+                                <span class="font-bold text-slate-800 block">Sweet Desi Dessert</span>
+                                <select id="dessertChoice" onchange="updateMenuChoice()" class="mt-2 bg-rose-50 text-slate-700 rounded-xl p-1.5 text-[11px] w-full border border-rose-200 outline-none focus:ring-1 focus:ring-rose-400">
+                                    <option>Warm Gulab Jamun dipped in Rabdi</option>
+                                    <option>Spongy Kesar Rasmalai with Pistachios</option>
+                                    <option>Classic Kolkata Mishti Doi & Rasgulla</option>
+                                    <option>Crispy Shahi Tukda with Rose Petals</option>
+                                    <option>Creamy Malai Kulfi with Falooda</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: STARLIT SKY -->
+        <div id="tab-sky" class="tab-content hidden transition-opacity duration-500">
+            <div class="glass-card-dark rounded-3xl p-6 md:p-8 shadow-2xl text-white border border-rose-400/30 relative overflow-hidden">
+                <div class="text-center max-w-lg mx-auto mb-6 relative z-10">
+                    <span class="text-xs uppercase tracking-widest text-pink-300 font-bold">Midnight Stargazing</span>
+                    <h3 class="font-serif-title text-2xl md:text-3xl font-bold text-pink-100 mt-1">Our Starlit Sky of Promises</h3>
+                    <p class="text-pink-200/80 text-xs md:text-sm mt-1">
+                        Click on the twinkling stars in our midnight sky to discover sweet promises Snehashis holds close to his heart.
+                    </p>
+                </div>
+
+                <!-- Interactive Star Sky Board -->
+                <div class="relative w-full h-80 sm:h-96 rounded-2xl bg-gradient-to-b from-slate-950 via-purple-950 to-rose-950 border border-pink-500/20 shadow-inner overflow-hidden" id="starFieldContainer">
+                    <!-- Glowing moon -->
+                    <div class="absolute top-6 right-8 w-16 h-16 rounded-full bg-amber-100/90 shadow-[0_0_35px_#ffe082] flex items-center justify-center opacity-90 pointer-events-none">
+                        <div class="w-14 h-14 rounded-full bg-slate-950/20 translate-x-2 -translate-y-1"></div>
+                    </div>
+
+                    <!-- Ambient shooting star line (SVG) -->
+                    <svg class="absolute inset-0 w-full h-full pointer-events-none">
+                        <line x1="10%" y1="20%" x2="30%" y2="40%" stroke="rgba(255, 255, 255, 0.25)" stroke-dasharray="4,6" />
+                        <line x1="50%" y1="15%" x2="75%" y2="35%" stroke="rgba(255, 255, 255, 0.25)" stroke-dasharray="4,6" />
+                        <line x1="35%" y1="65%" x2="65%" y2="75%" stroke="rgba(255, 255, 255, 0.25)" stroke-dasharray="4,6" />
+                    </svg>
+
+                    <!-- Interactive Stars plotted dynamically -->
+                    <div id="starsMount" class="absolute inset-0"></div>
+
+                    <!-- Star Message Reveal Popover -->
+                    <div id="starPopup" class="absolute bottom-4 inset-x-4 md:inset-x-12 bg-slate-900/90 border border-pink-400/50 backdrop-blur-md p-4 rounded-2xl transition-all duration-500 opacity-0 transform translate-y-4 pointer-events-none text-center">
+                        <span class="text-pink-300 text-xs font-bold uppercase tracking-wider block" id="starPopupTitle">Star of Promise</span>
+                        <p class="text-pink-50 font-serif-title text-sm md:text-base mt-1" id="starPopupDesc">Tap any star above to read what it holds for Suchismita...</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-pink-300/70 text-xs">
+                        Tip: You can find 7 distinct constellation stars scattered in the sky!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: SNEHASHIS'S LOVE LETTER -->
+        <div id="tab-letter" class="tab-content hidden transition-opacity duration-500">
+            <div class="glass-card rounded-3xl p-6 md:p-10 shadow-2xl border border-rose-200 relative">
+                
+                <!-- Stamp and wax seal header visual -->
+                <div class="flex justify-between items-start mb-6">
+                    <div class="border-2 border-rose-400/40 p-2 rounded-xl bg-rose-50/80">
+                        <div class="text-rose-500 font-serif-title text-xs font-bold uppercase tracking-wider">With Eternal Care</div>
+                        <div class="text-[10px] text-slate-500">Snehashis ❤️ Suchismita</div>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-rose-700 to-pink-600 text-white flex items-center justify-center font-serif-title font-bold text-lg shadow-md border-2 border-amber-200">
+                        S&S
+                    </div>
+                </div>
+
+                <!-- Letter Body with the Unwavering Promise -->
+                <div class="space-y-4 text-slate-700 leading-relaxed text-sm md:text-base font-light">
+                    <p class="font-script text-3xl md:text-4xl text-rose-600 font-normal">
+                        My Dearest Suchismita,
+                    </p>
+                    <p>
+                        Every now and then, in the middle of our daily rush, I pause just to appreciate how deeply blessed I am to have you in my life. You bring a kind of softness, warmth, and laughter that turns ordinary moments into cherished memories.
+                    </p>
+                    <p>
+                        Tonight may be a virtual date, but my feelings for you are as tangible and vibrant as the bouquet of red roses you unlocked. When I listen to <em>Ishq Mubarak</em>, every lyric echoes what my heart already knows: having you is my greatest gift, and loving you is the easiest, truest thing I will ever do.
+                    </p>
+                    <!-- Highlighted Unwavering Choice Box -->
+                    <div class="my-4 p-4 md:p-5 rounded-2xl bg-gradient-to-r from-rose-100/90 via-pink-100/80 to-amber-100/70 border border-rose-300/80 shadow-sm">
+                        <p class="font-serif-title text-slate-800 text-base md:text-lg font-semibold text-center italic leading-snug">
+                            "Suchismita, no matter what happens, no matter where life leads us, through every storm and every sunshine — you will always, without a shadow of doubt, be chosen by me."
+                        </p>
+                        <p class="text-rose-600 text-xs text-center mt-2 font-medium">
+                            Not just today, not just tomorrow, but in every single lifetime and every heartbeat.
+                        </p>
+                    </div>
+                    <p>
+                        I promise to stand beside you on our easiest, brightest days, and hold your hand with even greater tenderness on our hardest days. Out of all the billions of people in this world, I would choose you over and over again without a single moment of hesitation.
+                    </p>
+                    <p>
+                        Thank you for your patience, your gorgeous smile, your gentle heart, and for being uniquely, wonderfully <strong class="font-semibold text-rose-700">You</strong>. I promise to keep celebrating you, loving you, and cherishing every single step of our journey.
+                    </p>
+                    <div class="pt-4 text-right">
+                        <p class="text-xs uppercase tracking-widest text-slate-400 font-bold">Forever & Always Yours,</p>
+                        <p class="font-script text-3xl text-rose-600 font-normal">Snehashis</p>
+                    </div>
+                </div>
+
+                <!-- Proposal / Interactive Date Commitment -->
+                <div class="mt-10 pt-8 border-t border-rose-200/70 text-center">
+                    <h4 class="font-serif-title text-xl md:text-2xl font-bold text-slate-800 mb-2">
+                        Suchismita, will you be my date forever?
+                    </h4>
+                    <p class="text-slate-500 text-xs md:text-sm mb-6 max-w-md mx-auto">
+                        There is only one true answer in my heart, but feel free to choose below!
+                    </p>
+
+                    <div class="flex items-center justify-center gap-4 relative min-h-[60px]" id="proposalButtonArea">
+                        <button onclick="celebrateProposal()" id="yesBtn" class="px-8 py-3 rounded-full bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white font-bold text-sm shadow-xl shadow-rose-300 hover:scale-110 active:scale-95 transition-all">
+                            YES, Always & Forever! 💖
+                        </button>
+                        <button onmouseover="dodgeNoButton()" onclick="dodgeNoButton()" id="noBtn" class="px-6 py-3 rounded-full bg-slate-200 text-slate-700 font-semibold text-sm transition-all duration-200 select-none">
+                            Let me think... 🤔
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Sweet Card Modal for Rose details -->
+    <div id="roseModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden transition-opacity duration-300">
+        <div class="glass-card max-w-sm w-full rounded-3xl p-6 text-center shadow-2xl border border-rose-200 transform scale-95 transition-transform" id="roseModalContent">
+            <div class="text-5xl mb-3" id="modalRoseIcon">🌹</div>
+            <span class="text-xs font-bold uppercase tracking-widest text-rose-500" id="modalRoseNumber">Rose #1</span>
+            <h4 class="font-serif-title text-xl font-bold text-slate-800 mt-1 mb-3" id="modalRoseTitle">Title</h4>
+            <p class="text-slate-600 text-sm leading-relaxed mb-6" id="modalRoseMessage">Sweet message goes here.</p>
+            <button onclick="closeRoseModal()" class="w-full py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm shadow-md transition">
+                Cherish & Keep in Bouquet ❤️
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isMusicPlaying = false;
+        let ambientSynth = null;
+        let chimeSynth = null;
+        let bassSynth = null;
+        let melodyLoop = null;
+        let isCandleLit = true;
+        let gatheredRosesCount = 0;
+        let lyricInterval = null;
+
+        // Romantic 12 Roses Data
+        const rosesData = [
+            {
+                id: 1,
+                title: "Your Radiating Smile",
+                short: "The smile that brightens my darkest days.",
+                full: "Suchismita, the way your face lights up when you laugh or tell a happy story is my absolute favorite sight in the world. It brings instant calm to my soul.",
+                color: "from-rose-500 to-red-600",
+                picked: false
+            },
+            {
+                id: 2,
+                title: "Your Tender Heart",
+                short: "Kind, compassionate, and pure.",
+                full: "Your natural kindness and deep empathy for those around you inspire me daily. You have a heart of pure gold.",
+                color: "from-pink-500 to-rose-500",
+                picked: false
+            },
+            {
+                id: 3,
+                title: "Our Quiet Moments",
+                short: "Peace that needs no words.",
+                full: "Even in total silence or long distance, feeling your presence brings me an irreplaceable peace. Being with you feels like home.",
+                color: "from-red-500 to-rose-600",
+                picked: false
+            },
+            {
+                id: 4,
+                title: "Your Infectious Laugh",
+                short: "My favorite melody ever composed.",
+                full: "Whenever Snehashis hears you giggle or heartily laugh, everything feels right. I'd do anything just to hear you smile.",
+                color: "from-rose-400 to-pink-600",
+                picked: false
+            },
+            {
+                id: 5,
+                title: "Your Resilience & Grace",
+                short: "Stronger than you realize.",
+                full: "The grace with which you handle challenges and the courage you carry makes me admire you more with each passing day.",
+                color: "from-pink-600 to-rose-700",
+                picked: false
+            },
+            {
+                id: 6,
+                title: "Our Shared Dreams",
+                short: "The future waiting for us.",
+                full: "Every dream of tomorrow, every trip we talk about, and every small ambition is infinitely sweeter because you are in the picture.",
+                color: "from-red-600 to-rose-700",
+                picked: false
+            },
+            {
+                id: 7,
+                title: "Your Expressive Eyes",
+                short: "A universe of warmth.",
+                full: "Whenever you look at me, I see honesty, warmth, and the girl I want to keep choosing every single day.",
+                color: "from-rose-500 to-red-500",
+                picked: false
+            },
+            {
+                id: 8,
+                title: "Our Late-Night Talks",
+                short: "Whispers under the moon.",
+                full: "Those conversations where time stands still and neither of us wants to say goodnight. Those are treasures I replay in my mind.",
+                color: "from-pink-500 to-rose-600",
+                picked: false
+            },
+            {
+                id: 9,
+                title: "How You Understand Me",
+                short: "Without speaking a single word.",
+                full: "You read between the lines, sense my moods, and offer comfort before I even ask. That connection is rare and priceless.",
+                color: "from-rose-600 to-pink-500",
+                picked: false
+            },
+            {
+                id: 10,
+                title: "Your Adorable Pouts",
+                short: "Endearing beyond words.",
+                full: "The tiny expressions, your cute protests, and playful mood swings are the sweetest things I ever get to witness.",
+                color: "from-pink-400 to-rose-500",
+                picked: false
+            },
+            {
+                id: 11,
+                title: "The Comfort of Your Voice",
+                short: "Instant relief after a long day.",
+                full: "Hearing 'Snehashis' in your voice melts away all stress. Your voice is my favorite soothing sanctuary.",
+                color: "from-red-500 to-rose-600",
+                picked: false
+            },
+            {
+                id: 12,
+                title: "Simply You, Suchismita",
+                short: "My forever favorite person.",
+                full: "For no reason other than the wonderful, irreplaceable woman you are. I love you for who you were, who you are, and who you will become.",
+                color: "from-rose-600 to-red-700",
+                picked: false
+            }
+        ];
+
+        // Starlit Sky Promise Data
+        const skyStarsData = [
+            { x: 18, y: 32, title: "Star of Unwavering Support", text: "Whenever you feel overwhelmed, I will be your rock and biggest cheerleader." },
+            { x: 38, y: 22, title: "Star of Countless Laughter", text: "I promise to keep making you laugh until your cheeks hurt!" },
+            { x: 55, y: 40, title: "Star of Honest Understanding", text: "I promise to listen with an open heart, always valuing your thoughts and feelings." },
+            { x: 70, y: 28, title: "Star of Safe Haven", text: "You will never have to face sadness or self-doubt alone; I am by your side." },
+            { x: 28, y: 72, title: "Star of Shared Adventures", text: "To explore new places with you, hand in hand, creating endless memories." },
+            { x: 62, y: 70, title: "Star of Lifelong Romance", text: "To surprise you with roses, date nights, and reminders of how loved you are." },
+            { x: 82, y: 55, title: "Star of Unconditional Care", text: "To love Suchismita on good days, hard days, and every day in between." }
+        ];
+
+        /* Ishq Mubarak Chorus Lyrics to rotate smoothly */
+        const ishqLyrics = [
+            '"Teri baarishein bhigaaye mujhe..."',
+            '"Teri hawaaein bahaaye mujhe..."',
+            '"Ishq mubarak, dard mubarak..."',
+            '"Ishq mubarak, dard mubarak... ❤️"',
+            '"No matter what, you are always chosen by Snehashis..."',
+            '"Teri baarishein bhigaaye mujhe..."'
+        ];
+        let currentLyricIdx = 0;
+
+        function initAudio() {
+            if (ambientSynth) return;
+            try {
+                // Lead Melody Synth (warm romantic acoustic tone)
+                ambientSynth = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "triangle" },
+                    envelope: { attack: 0.08, decay: 0.8, sustain: 0.4, release: 1.8 }
+                }).toDestination();
+                ambientSynth.volume.value = -9;
+
+                // Warm Bass & Pad accompaniment
+                bassSynth = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.2, decay: 1.5, sustain: 0.6, release: 2.5 }
+                }).toDestination();
+                bassSynth.volume.value = -16;
+
+                // Chime for toasts and petals
+                chimeSynth = new Tone.Synth({
+                    oscillator: { type: "triangle" },
+                    envelope: { attack: 0.01, decay: 0.4, sustain: 0.1, release: 1.0 }
+                }).toDestination();
+                chimeSynth.volume.value = -10;
+
+                // "Ishq Mubarak" (Tum Bin 2 - Arijit Singh) Melody Transcription
+                // Phrase 1: "Te-ri baa-ri-shein bhee-gaaye mu-jhe" -> F4, G4, A4, G4, F4, A4, C5, A4, G4
+                // Phrase 2: "Te-ri ha-waa-ein ba-haaye mu-jhe" -> F4, G4, A4, G4, F4, A4, C5, D5, C5
+                // Phrase 3: "Ishq mu-baa-rak... dard mu-baa-rak" -> D5, C5, Bb4, A4, G4... Bb4, A4, G4, F4, E4
+                // Phrase 4: "Ishq mu-baa-rak... dard mu-baa-rak" -> F4, G4, A4, G4, F4, G4...
+                const ishqMelody = [
+                    // Bar 1 - "Teri baarishein..."
+                    { time: "0:0", note: "F4", bass: ["F2", "A3", "C4"], dur: "8n" },
+                    { time: "0:1", note: "G4", dur: "8n" },
+                    { time: "0:2", note: "A4", dur: "4n" },
+                    { time: "0:3", note: "G4", dur: "8n" },
+                    { time: "1:0", note: "F4", bass: ["D2", "F3", "A3"], dur: "8n" },
+                    { time: "1:1", note: "A4", dur: "8n" },
+                    { time: "1:2", note: "C5", dur: "4n" },
+                    { time: "1:3", note: "G4", dur: "4n" },
+
+                    // Bar 2 - "Teri hawaaein bahaaye mujhe..."
+                    { time: "2:0", note: "F4", bass: ["Bb2", "D3", "F3"], dur: "8n" },
+                    { time: "2:1", note: "G4", dur: "8n" },
+                    { time: "2:2", note: "A4", dur: "4n" },
+                    { time: "2:3", note: "G4", dur: "8n" },
+                    { time: "3:0", note: "F4", bass: ["C3", "E3", "G3"], dur: "8n" },
+                    { time: "3:1", note: "A4", dur: "8n" },
+                    { time: "3:2", note: "C5", dur: "8n" },
+                    { time: "3:2:2", note: "D5", dur: "8n" },
+                    { time: "3:3", note: "C5", dur: "4n" },
+
+                    // Bar 3 - "Ishq mubarak... dard mubarak..."
+                    { time: "4:0", note: "D5", bass: ["D2", "F3", "A3"], dur: "4n" },
+                    { time: "4:1", note: "C5", dur: "8n" },
+                    { time: "4:2", note: "Bb4", dur: "8n" },
+                    { time: "4:3", note: "A4", dur: "8n" },
+                    { time: "5:0", note: "G4", bass: ["Bb2", "D3", "F3"], dur: "4n" },
+                    { time: "5:1", note: "Bb4", dur: "8n" },
+                    { time: "5:2", note: "A4", dur: "8n" },
+                    { time: "5:2:2", note: "G4", dur: "8n" },
+                    { time: "5:3", note: "F4", dur: "4n" },
+
+                    // Bar 4 - "Ishq mubarak... dard mubarak..."
+                    { time: "6:0", note: "F4", bass: ["C3", "E3", "G3"], dur: "8n" },
+                    { time: "6:1", note: "G4", dur: "8n" },
+                    { time: "6:2", note: "A4", dur: "4n" },
+                    { time: "6:3", note: "G4", dur: "8n" },
+                    { time: "7:0", note: "F4", bass: ["F2", "A3", "C4"], dur: "4n" },
+                    { time: "7:2", note: "G4", dur: "4n" }
+                ];
+
+                melodyLoop = new Tone.Part((time, value) => {
+                    ambientSynth.triggerAttackRelease(value.note, value.dur, time);
+                    if (value.bass) {
+                        bassSynth.triggerAttackRelease(value.bass, "2n", time);
+                    }
+                }, ishqMelody);
+
+                melodyLoop.loop = true;
+                melodyLoop.loopEnd = "8m";
+
+                Tone.Transport.bpm.value = 76;
+            } catch (err) {
+                console.error("Audio init error:", err);
+            }
+        }
+
+        async function toggleRomanticMusic() {
+            try {
+                await Tone.start();
+                initAudio();
+
+                const btn = document.getElementById("musicToggleBtn");
+                const icon = document.getElementById("musicIcon");
+                const label = document.getElementById("musicLabel");
+                const banner = document.getElementById("songBanner");
+
+                if (!isMusicPlaying) {
+                    Tone.Transport.start();
+                    melodyLoop.start(0);
+                    isMusicPlaying = true;
+                    icon.textContent = "💖";
+                    label.textContent = "Playing 'Ishq Mubarak'";
+                    btn.classList.replace("bg-rose-500", "bg-pink-600");
+                    banner.classList.remove("hidden");
+
+                    // Start lyric ticker
+                    if (!lyricInterval) {
+                        lyricInterval = setInterval(() => {
+                            currentLyricIdx = (currentLyricIdx + 1) % ishqLyrics.length;
+                            const ticker = document.getElementById("lyricTicker");
+                            if (ticker) {
+                                ticker.style.opacity = "0";
+                                setTimeout(() => {
+                                    ticker.textContent = ishqLyrics[currentLyricIdx];
+                                    ticker.style.opacity = "1";
+                                }, 300);
+                            }
+                        }, 4000);
+                    }
+                } else {
+                    Tone.Transport.pause();
+                    isMusicPlaying = false;
+                    icon.textContent = "🎵";
+                    label.textContent = "Play 'Ishq Mubarak'";
+                    btn.classList.replace("bg-pink-600", "bg-rose-500");
+                    banner.classList.add("hidden");
+                    if (lyricInterval) {
+                        clearInterval(lyricInterval);
+                        lyricInterval = null;
+                    }
+                }
+            } catch (e) {
+                console.log("Tone interaction needed first.");
+            }
+        }
+
+        function playSparkleSound() {
+            if (chimeSynth) {
+                try {
+                    chimeSynth.triggerAttackRelease("E5", "16n");
+                    setTimeout(() => chimeSynth.triggerAttackRelease("G5", "16n"), 80);
+                    setTimeout(() => chimeSynth.triggerAttackRelease("C6", "8n"), 160);
+                } catch(e) {}
+            }
+        }
+
+        function renderRoses() {
+            const grid = document.getElementById("roseGrid");
+            grid.innerHTML = "";
+
+            rosesData.forEach((rose) => {
+                const card = document.createElement("div");
+                card.className = `p-4 rounded-2xl cursor-pointer transition-all duration-300 border text-center relative overflow-hidden group select-none ${
+                    rose.picked 
+                    ? "bg-rose-50 border-rose-300 shadow-md scale-100" 
+                    : "bg-white/80 hover:bg-rose-50/50 border-rose-100 hover:border-rose-300 hover:-translate-y-1 hover:shadow-lg"
+                }`;
+                card.onclick = () => openRoseCard(rose.id);
+
+                card.innerHTML = `
+                    <div class="relative w-14 h-14 mx-auto mb-2 flex items-center justify-center">
+                        <div class="text-3xl transition-transform duration-300 group-hover:scale-125 ${rose.picked ? 'scale-110' : 'opacity-80'}">
+                            ${rose.picked ? '🌹' : '🥀'}
+                        </div>
+                        ${rose.picked ? '<span class="absolute -top-1 -right-1 text-xs bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center shadow">✓</span>' : ''}
+                    </div>
+                    <span class="text-[11px] font-bold text-rose-500 block uppercase tracking-wider">Rose #${rose.id}</span>
+                    <h4 class="font-serif-title text-sm font-semibold text-slate-800 line-clamp-1">${rose.title}</h4>
+                    <p class="text-[11px] text-slate-500 mt-1 line-clamp-2">${rose.short}</p>
+                    <div class="mt-3">
+                        <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${rose.picked ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'}">
+                            ${rose.picked ? 'In Bouquet ❤️' : 'Click to Pick'}
+                        </span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            updateBouquetStatus();
+        }
+
+        function openRoseCard(id) {
+            const rose = rosesData.find(r => r.id === id);
+            if (!rose) return;
+
+            if (!rose.picked) {
+                rose.picked = true;
+                gatheredRosesCount++;
+                playSparkleSound();
+                renderRoses();
+                burstSmallHearts();
+            }
+
+            document.getElementById("modalRoseIcon").textContent = "🌹";
+            document.getElementById("modalRoseNumber").textContent = `Rose #${rose.id} for Suchismita`;
+            document.getElementById("modalRoseTitle").textContent = rose.title;
+            document.getElementById("modalRoseMessage").textContent = rose.full;
+
+            const modal = document.getElementById("roseModal");
+            const modalContent = document.getElementById("roseModalContent");
+            modal.classList.remove("hidden");
+            setTimeout(() => {
+                modalContent.classList.remove("scale-95");
+                modalContent.classList.add("scale-100");
+            }, 10);
+        }
+
+        function closeRoseModal() {
+            const modal = document.getElementById("roseModal");
+            const modalContent = document.getElementById("roseModalContent");
+            modalContent.classList.add("scale-95");
+            modalContent.classList.remove("scale-100");
+            setTimeout(() => modal.classList.add("hidden"), 200);
+        }
+
+        function updateBouquetStatus() {
+            const picked = rosesData.filter(r => r.picked).length;
+            const counter = document.getElementById("roseCounterText");
+            const badgeIcon = document.getElementById("bouquetBadgeIcon");
+            const banner = document.getElementById("fullBouquetBanner");
+
+            counter.textContent = `${picked} / 12 Gathered`;
+            if (picked > 0) {
+                badgeIcon.textContent = "🌹";
+            }
+            if (picked === 12) {
+                badgeIcon.textContent = "💐";
+                banner.classList.remove("hidden");
+            }
+        }
+
+        function toggleCandle() {
+            isCandleLit = !isCandleLit;
+            const flame = document.getElementById("candleFlame");
+            const status = document.getElementById("candleStatusText");
+
+            if (isCandleLit) {
+                flame.style.opacity = "1";
+                status.textContent = "🔥 Candle is Glowing";
+                status.className = "text-[11px] font-semibold text-amber-600 mt-2 group-hover:scale-105 transition";
+                playSparkleSound();
+            } else {
+                flame.style.opacity = "0";
+                status.textContent = "💨 Tap to Light Candle";
+                status.className = "text-[11px] font-semibold text-slate-400 mt-2 group-hover:scale-105 transition";
+            }
+        }
+
+        function cheersToast() {
+            const leftGlass = document.getElementById("leftGlass");
+            const msg = document.getElementById("toastMessage");
+
+            // Animation
+            leftGlass.style.transform = "scale(1.3) rotate(-15deg)";
+            setTimeout(() => {
+                leftGlass.style.transform = "scale(1) rotate(0deg)";
+            }, 350);
+
+            // Audio
+            if (chimeSynth) {
+                try {
+                    chimeSynth.triggerAttackRelease("C6", "4n");
+                } catch(e) {}
+            }
+
+            // Romantic toast quotes
+            const toasts = [
+                "Cheers to Suchismita's dazzling smile! 🥂",
+                "To us, our endless laughs, and future adventures! ✨",
+                "Here is to the prettiest girl in the world! 🌹",
+                "To Snehashis & Suchismita, side by side! ❤️"
+            ];
+            msg.textContent = toasts[Math.floor(Math.random() * toasts.length)];
+            burstSmallHearts();
+        }
+
+        function updateMenuChoice() {
+            const bev = document.getElementById("beverageChoice").value;
+            const main = document.getElementById("mainChoice").value;
+            const dessert = document.getElementById("dessertChoice").value;
+            const msg = document.getElementById("toastMessage");
+            msg.textContent = `A royal Indian dinner: ${bev}, ${main} & ${dessert}! 🍛❤️`;
+            playSparkleSound();
+        }
+
+        function renderStarSky() {
+            const container = document.getElementById("starsMount");
+            container.innerHTML = "";
+
+            skyStarsData.forEach((star, index) => {
+                const starEl = document.createElement("div");
+                starEl.className = "absolute cursor-pointer group flex items-center justify-center";
+                starEl.style.left = `${star.x}%`;
+                starEl.style.top = `${star.y}%`;
+
+                starEl.innerHTML = `
+                    <div class="w-7 h-7 -m-2 flex items-center justify-center">
+                        <span class="text-amber-200 group-hover:text-pink-300 text-lg md:text-xl transition-transform group-hover:scale-150 animate-pulse duration-1000">✦</span>
+                    </div>
+                `;
+
+                starEl.onclick = () => showStarDetail(star);
+                container.appendChild(starEl);
+            });
+        }
+
+        function showStarDetail(star) {
+            playSparkleSound();
+            const pop = document.getElementById("starPopup");
+            const title = document.getElementById("starPopupTitle");
+            const desc = document.getElementById("starPopupDesc");
+
+            title.textContent = `✨ ${star.title}`;
+            desc.textContent = `"${star.text}"`;
+
+            pop.classList.remove("opacity-0", "translate-y-4");
+            pop.classList.add("opacity-100", "translate-y-0");
+
+            burstSmallHearts();
+        }
+
+        async function openEnvelope() {
+            const overlay = document.getElementById("welcomeOverlay");
+            overlay.classList.add("opacity-0");
+            setTimeout(() => overlay.remove(), 700);
+
+            // Auto-start music on initial intentional user gesture
+            try {
+                await Tone.start();
+                initAudio();
+                toggleRomanticMusic();
+            } catch(e) {}
+
+            burstCelebration();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+            document.querySelectorAll(".tab-btn").forEach(btn => {
+                btn.className = "tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-semibold transition-all bg-white/80 text-slate-700 hover:bg-rose-50 hover:text-rose-600 flex items-center space-x-1.5";
+            });
+
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            const targetBtn = document.getElementById(`tabBtn-${tabId}`);
+            if (targetTab && targetBtn) {
+                targetTab.classList.remove("hidden");
+                targetBtn.className = "tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-semibold transition-all bg-rose-500 text-white shadow-md shadow-rose-200 flex items-center space-x-1.5";
+            }
+        }
+
+        function toggleAmbiance() {
+            const body = document.getElementById("mainBody");
+            const label = document.getElementById("ambianceLabel");
+            const icon = document.getElementById("ambianceIcon");
+
+            if (body.classList.contains("ambient-dim")) {
+                body.classList.remove("ambient-dim");
+                label.textContent = "Candlelight Mood";
+                icon.textContent = "🕯️";
+            } else {
+                body.classList.add("ambient-dim");
+                label.textContent = "Daylight Mode";
+                icon.textContent = "☀️";
+            }
+        }
+
+        function dodgeNoButton() {
+            const noBtn = document.getElementById("noBtn");
+            const randomX = (Math.random() - 0.5) * 160;
+            const randomY = (Math.random() - 0.5) * 80;
+            noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+            
+            const playfulPrompts = [
+                "Snehashis won't let you click this! 😜",
+                "Are you sure? Try YES! ❤️",
+                "Too slow! Suchismita + Snehashis forever! ✨",
+                "Nice try! 😉"
+            ];
+            noBtn.textContent = playfulPrompts[Math.floor(Math.random() * playfulPrompts.length)];
+        }
+
+        function celebrateProposal() {
+            playSparkleSound();
+            burstCelebration();
+
+            const proposalArea = document.getElementById("proposalButtonArea");
+            proposalArea.innerHTML = `
+                <div class="bg-gradient-to-r from-rose-500 to-pink-500 text-white p-6 rounded-3xl shadow-2xl animate-fade-in w-full max-w-md mx-auto">
+                    <p class="text-3xl mb-2">💍🌹✨</p>
+                    <h3 class="font-script text-4xl mb-1">She Said YES!</h3>
+                    <p class="text-rose-100 text-sm font-light">
+                        Snehashis promises to love, adore, and make Suchismita smile every single day. Happy Virtual Date Night, my darling!
+                    </p>
+                </div>
+            `;
+        }
+
+        const petalCanvas = document.getElementById("petalCanvas");
+        const pCtx = petalCanvas.getContext("2d");
+        let petals = [];
+
+        function resizeCanvas() {
+            petalCanvas.width = window.innerWidth;
+            petalCanvas.height = window.innerHeight;
+            const fxCanvas = document.getElementById("fxCanvas");
+            fxCanvas.width = window.innerWidth;
+            fxCanvas.height = window.innerHeight;
+        }
+        window.addEventListener("resize", resizeCanvas);
+
+        class Petal {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * petalCanvas.width;
+                this.y = Math.random() * -petalCanvas.height;
+                this.size = Math.random() * 8 + 8;
+                this.speedY = Math.random() * 1.5 + 0.8;
+                this.speedX = (Math.random() - 0.5) * 1.2;
+                this.rotation = Math.random() * 360;
+                this.rotSpeed = (Math.random() - 0.5) * 2;
+                this.color = Math.random() > 0.4 ? "rgba(244, 63, 94, 0.65)" : "rgba(251, 113, 133, 0.5)";
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += Math.sin(this.y * 0.01) * 0.8 + this.speedX;
+                this.rotation += this.rotSpeed;
+                if (this.y > petalCanvas.height) {
+                    this.reset();
+                    this.y = -10;
+                }
+            }
+            draw() {
+                pCtx.save();
+                pCtx.translate(this.x, this.y);
+                pCtx.rotate((this.rotation * Math.PI) / 180);
+                pCtx.fillStyle = this.color;
+                pCtx.beginPath();
+                pCtx.moveTo(0, 0);
+                pCtx.bezierCurveTo(-this.size, -this.size / 2, -this.size, this.size, 0, this.size * 1.3);
+                pCtx.bezierCurveTo(this.size, this.size, this.size, -this.size / 2, 0, 0);
+                pCtx.fill();
+                pCtx.restore();
+            }
+        }
+
+        function initPetals() {
+            petals = [];
+            const count = window.innerWidth < 640 ? 25 : 45;
+            for (let i = 0; i < count; i++) {
+                petals.push(new Petal());
+            }
+        }
+
+        function animatePetals() {
+            pCtx.clearRect(0, 0, petalCanvas.width, petalCanvas.height);
+            petals.forEach(petal => {
+                petal.update();
+                petal.draw();
+            });
+            requestAnimationFrame(animatePetals);
+        }
+
+        const fxCanvas = document.getElementById("fxCanvas");
+        const fxCtx = fxCanvas.getContext("2d");
+        let particles = [];
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 6 + 2;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.02 + 0.01;
+                this.size = Math.random() * 5 + 3;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.08; // gravity
+                this.alpha -= this.decay;
+            }
+            draw() {
+                fxCtx.save();
+                fxCtx.globalAlpha = Math.max(0, this.alpha);
+                fxCtx.fillStyle = this.color;
+                fxCtx.beginPath();
+                fxCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                fxCtx.fill();
+                fxCtx.restore();
+            }
+        }
+
+        function burstCelebration() {
+            const colors = ["#f43f5e", "#fb7185", "#ec4899", "#f59e0b", "#fbbf24", "#ffffff"];
+            for (let burst = 0; burst < 4; burst++) {
+                setTimeout(() => {
+                    const cx = Math.random() * fxCanvas.width;
+                    const cy = Math.random() * (fxCanvas.height * 0.5) + 80;
+                    for (let i = 0; i < 40; i++) {
+                        particles.push(new Particle(cx, cy, colors[Math.floor(Math.random() * colors.length)]));
+                    }
+                }, burst * 220);
+            }
+        }
+
+        function burstSmallHearts() {
+            const colors = ["#f43f5e", "#fb7185", "#fda4af"];
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            for (let i = 0; i < 25; i++) {
+                particles.push(new Particle(cx, cy, colors[Math.floor(Math.random() * colors.length)]));
+            }
+        }
+
+        function animateFx() {
+            fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw();
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(animateFx);
+        }
+
+        window.onload = function() {
+            resizeCanvas();
+            renderRoses();
+            renderStarSky();
+            initPetals();
+            animatePetals();
+            animateFx();
+        };
+    </script>
+</body>
+</html>
